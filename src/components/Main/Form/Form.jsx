@@ -1,4 +1,4 @@
-import React,{useState,useEffect,useContext} from 'react';
+import React,{useState,useEffect,useContext,useCallback} from 'react';
 import {TextField,Grid,Typography,Button,FormControl,InputLabel,Select,MenuItem} from '@material-ui/core'
 import {ExpenseTrackerContext} from '../../../context/context'
 import {v4 as uuidv4} from 'uuid'
@@ -23,15 +23,14 @@ const Form = () => {
    const [open,setOpen]=useState(false);
 
 
-    const createTransaction=()=>{
-        if(Number.isNaN(Number(formData.amount)) || !formData.date.includes('-') ) return ;
-        const transaction={...formData,amount:Number(formData.amount),id:uuidv4()}
-        
-        setOpen(true);
-        addTransaction(transaction);
-        setFormData(initialState);
-    }
+   const createTransaction = useCallback(() => {
+    if (Number.isNaN(Number(formData.amount)) || !formData.date.includes('-')) return;
+    const transaction = { ...formData, amount: Number(formData.amount), id: uuidv4() };
 
+    setOpen(true);
+    addTransaction(transaction);
+    setFormData((prevFormData) => ({ ...prevFormData, ...initialState }));
+}, [addTransaction, formData]);
     useEffect(()=>{
          // console.log("Hello");
          if(segment)
@@ -71,7 +70,7 @@ const Form = () => {
                  createTransaction();
             }
          }
-    },[segment])
+    },[segment,createTransaction,formData])
     const selectedCategories=formData.type==='Income'?incomeCategories:expenseCategories;
 
     return (
